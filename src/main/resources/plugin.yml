@@ -1,0 +1,16 @@
+name: ImpossibleDragon
+version: '${project.version}'
+main: dev.impossibledragon.ImpossibleDragon
+api-version: '1.21'
+softdepend: [floodgate]
+description: A brutal, multi-phase Ender Dragon fight inspired by the "Impossible Dragon" datapack.
+commands:
+  impossibledragon:
+    description: Manage the Impossible Dragon
+    usage: /<command> <reload|status|retune>
+    aliases: [idragon]
+    permission: impossibledragon.admin
+permissions:
+  impossibledragon.admin:
+    description: Use /impossibledragon
+    default: op

@@ -1,0 +1,210 @@
+# ImpossibleDragon configuration
+# Phase 1: HP > 66%   Phase 2: 33-66%   Phase 3 (ENRAGED): < 33%
+#
+# FIGHT FLOW (shield.mode: HEAL_LOCK - default)
+#  1. The dragon can ALWAYS be hit. While crystals live they HEAL it.
+#  2. Every destroyed crystal gets its OWN respawn timer (hologram + filling ring): 60s.
+#  3. Destroy the LAST crystal before the FIRST one respawns -> SHIELD BREAKS and the dragon can
+#     no longer heal (no crystal healing, no lifesteal) for `broken-seconds`.
+#  4. Otherwise crystals come back one by one. Shield reforms when the break ends, and every
+#     crystal returns at each phase change / rebirth.
+#  5. After `fight.time-limit-seconds` the dragon goes DOOM (berserk).
+#  (shield.mode: IMMUNITY brings back the old "immune until the shield breaks" fight.)
+
+dragon:
+  max-health: 600
+  damage-taken-multiplier: 0.6 # only used when shield.enabled = false
+  max-damage-per-hit: 30       # 0 = off
+  damage-dealt-multiplier: 2.0 # damage dealt by the dragon and its attacks
+  lifesteal: 0.5               # dragon heals this fraction of damage it deals
+  crystal-heal-per-second: 1.0 # healing per living crystal per second
+  enrage-cooldown-multiplier: 0.5 # phase 3: ability cooldowns multiplied by this
+  flip-facing: false           # set true if tail/mouth effects show up on the wrong end
+  boss-bar-title: "&5&lImpossible Ender Dragon"
+
+fight:
+  time-limit-seconds: 600      # 10 minutes, then DOOM (0 = no limit)
+  doom-damage-multiplier: 2.0
+  doom-cooldown-multiplier: 0.4
+
+shield:
+  enabled: true
+  mode: HEAL_LOCK              # HEAL_LOCK = always hittable, shield only controls healing | IMMUNITY = old behaviour
+  crystal-respawn-seconds: 60  # each crystal comes back this long after it was destroyed
+  broken-seconds: 120          # HEAL_LOCK: how long the dragon cannot heal after the shield breaks (0 = until the next phase)
+  up-damage-multiplier: 1.0    # HEAL_LOCK: damage the dragon takes while the shield is up
+  broken-damage-multiplier: 1.0
+  phase-gate-floor: false      # HEAL_LOCK: true = one burst can't skip a phase (old behaviour)
+  lock-land-on-break: false    # HEAL_LOCK: dragon lands on the portal when the shield breaks
+  race-bar: true               # action bar: crystals left + time until the FIRST one comes back
+  show-timers: true            # floating "Crystal returns in Ns" text (turns yellow/red + ticks near the end)
+  # --- IMMUNITY mode only ---
+  damage-multiplier: 0.0       # damage while shielded (0 = immune)
+  heal-on-reform: 0.05         # if you were too slow the dragon regains this fraction of max HP
+  land-on-break: true          # dragon lands on the portal while vulnerable
+
+rebirth:                       # the dragon "dies" ONCE, then rises again in a FINAL FORM (phase 4)
+  enabled: true
+  duration-seconds: 6          # invulnerable rebirth animation
+  health-fraction: 0.5         # health refilled to this fraction of max
+  damage-multiplier: 1.25      # extra damage dealt in final form
+  cooldown-multiplier: 0.8     # ability cooldowns in final form
+
+abilities:
+  fireball:                    # exploding dragon fireballs
+    enabled: true
+    min-phase: 1
+    cooldown-seconds: 7
+    count: 4                   # +1 per phase above 1, +1 per 2 players
+    explosion-power: 3.0       # 0 = vanilla
+
+  wither-skulls:
+    enabled: true
+    min-phase: 2
+    cooldown-seconds: 10
+    count: 4
+    break-blocks: false
+
+  lightning:                   # marked with sparks, strikes ~1s later
+    enabled: true
+    min-phase: 2
+    cooldown-seconds: 9
+    bolts: 3                   # +1 in phase 3, one per player in DOOM
+
+  tail:                        # telegraphed tail sweep
+    enabled: true
+    min-phase: 1
+    cooldown-seconds: 6
+    range: 30
+    damage: 10
+    knockback: 1.5
+
+  lightning-breath:            # charge at the mouth, beam hits where you WERE standing
+    enabled: true
+    min-phase: 2
+    cooldown-seconds: 12
+    windup-ticks: 22
+    damage: 12                 # base damage, goes through dragon.damage-dealt-multiplier like everything else
+    max-health-fraction: 0.45  # ONE breath hit can never take more than this share of a player's max HP (0 = no cap)
+    edge-damage-factor: 0.6    # the rim of the beam only does this much of the damage (core = full)
+    fire-ticks: 40             # burning time after a hit (was 80)
+    length: 70
+
+  meteors:                     # marked circles, then fireballs fall from the sky
+    enabled: true
+    min-phase: 2
+    cooldown-seconds: 16
+    count: 6                   # +3 in phase 3
+    explosion-power: 3.0
+    break-blocks: false
+
+  void-orbs:                   # homing shulker bullets (levitation)
+    enabled: true
+    min-phase: 2
+    cooldown-seconds: 14
+    count: 3
+
+  gravity-well:                # drags everyone towards the dragon
+    enabled: true
+    min-phase: 3
+    cooldown-seconds: 28
+    radius: 45
+    strength: 0.22
+    duration-ticks: 50
+
+  minions:
+    enabled: true
+    min-phase: 1
+    cooldown-seconds: 22
+    per-wave: 4
+    max-alive: 14
+    lifetime-seconds: 60
+    types: [ENDERMITE]           # only ENDERMITE gets the dragonling model (other types keep their vanilla look)
+
+  roar:                        # darkness + nausea + slowness
+    enabled: true
+    min-phase: 2
+    cooldown-seconds: 26
+    radius: 50
+
+  levitation:                  # lifts you up, then you fall
+    enabled: true
+    min-phase: 3
+    cooldown-seconds: 22
+    duration-ticks: 40
+
+models:
+  enabled: true
+  brightness: 11               # light level of the dragon models (0-15)
+  # JAVA: needs ImpossibleDragon-Java-ResourcePack.zip. Host it somewhere and put the link + SHA-1 here
+  # and every Java player gets it on join (leave url empty to distribute it yourself).
+  java-resource-pack:
+    url: ""
+    sha1: ""
+    required: false
+  # BEDROCK (Geyser): drop ImpossibleDragon-Bedrock.mcpack into plugins/Geyser-*/packs/ - no plugin settings needed.
+  dragon:
+    # true  = plugin draws MY dragon with ItemDisplays (works on vanilla Java clients, use the "VanillaClient" pack)
+    # false = use the CEM pack (your dragon.jem; Java players need OptiFine or the Entity Model Features mod)
+    enabled: false
+    scale: 0.85                # Bedrock pack is built with the same default
+    y-offset: 2.0
+  three-heads:
+    enabled: true              # 1 extra head + neck on each side of the real head (Java, needs the resource pack).
+                               # They are slaved to the real head: same direction, same jaw, they follow every turn.
+    spacing: 2.4               # distance of each side head from the real head (blocks)
+    neck-fan: 18.0             # how much the side necks bow outwards (degrees)
+    size: 1.0                  # 1.0 = exactly the size of the vanilla head
+    y-adjust: 0.0              # nudge the extra heads up/down (blocks)
+  minions:
+    enabled: true              # minions = ENDERMITES, shown as flapping dragonlings
+    scale: 1.0
+    y-offset: 0.6
+    health: 40                 # endermites are buffed so they are real minions
+    damage: 6
+  skull-heads:
+    enabled: true              # wither skulls fly as dragon heads
+    scale: 0.22
+
+effects:
+  crystal-bubble:
+    enabled: true              # violet sphere + lightning + rune circle (needs the resource pack)
+    scale: 1.0
+  warning-text: bedrock        # action-bar warnings for attacks: bedrock | everyone | off
+  crystal-circles:
+    enabled: true              # animated purple circles, spinning shields, timer rings
+
+rewards:
+  bonus-xp: 5000
+  items:                       # MATERIAL:amount
+    - "NETHERITE_INGOT:3"
+    - "ENCHANTED_GOLDEN_APPLE:2"
+    - "DIAMOND:24"
+    - "ELYTRA:1"
+
+messages:
+  phase-2: "&d&lThe Impossible Dragon grows stronger..."
+  phase-3: "&4&lTHE DRAGON IS ENRAGED!"
+  roar: "&5The dragon roars!"
+  lift: "&bThe void lifts you..."
+  death: "&a&lThe Impossible Dragon has been slain!"
+  doom: "&4&lTIME'S UP - THE DRAGON GOES BERSERK!"
+  shield-broken: "&a&lSHIELD BROKEN!"
+  shield-broken-sub: "&7Hit it! Vulnerable for {seconds}s"
+  shield-broken-sub-lock: "&7The dragon can no longer heal for {seconds}s!"
+  shield-broken-sub-lock-phase: "&7The dragon can no longer heal until its next phase!"
+  shield-restored: "&5&lSHIELD RESTORED"
+  shield-restored-sub: "&7Destroy every crystal again!"
+  shield-restored-sub-lock: "&7Crystals are back - the dragon can heal again!"
+  shield-race: "&5&lSHIELD RACE &8| &d{left} &7crystal(s) left &8| &7first returns in {time}"
+  crystal-down: "&dCrystal destroyed &7(&f{down}&7/&f{total}&7) &8- &fback in {seconds}s"
+  warn-tail: "&c&l! TAIL STRIKE - get away from the dragon !"
+  warn-breath: "&e&l! LIGHTNING BREATH locked on you - MOVE !"
+  warn-lightning: "&e&l! Lightning incoming - MOVE !"
+  warn-meteors: "&6&l! METEORS - watch the ground circles !"
+  warn-orbs: "&5&l! VOID ORBS are homing on you !"
+  warn-pull: "&3&l! GRAVITY WELL - fight the pull !"
+  rebirth: "&4&lTHE DRAGON REFUSES TO DIE!"
+  rebirth-sub: "&7It rises again..."
+  phase-4: "&4&lFINAL FORM - THE DRAGON IS REBORN!"
+  phase-4-sub: "&7Faster. Stronger. No more second chances."
